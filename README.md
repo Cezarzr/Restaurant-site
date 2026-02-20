@@ -10,13 +10,17 @@ Production-ready Next.js + Prisma full-stack app for live schedule, menus, booki
 - Nodemailer SMTP notifications
 - FullCalendar for public/admin calendars
 - Vitest + Playwright tests
+- Docker + docker-compose
 
-## Setup (Local)
+## Setup
 1. Copy env:
    ```bash
    cp .env.example .env
    ```
-2. Ensure PostgreSQL is running locally and update `DATABASE_URL` in `.env` if needed.
+2. Start database + app dependencies:
+   ```bash
+   docker-compose up -d db
+   ```
 3. Install deps:
    ```bash
    npm install
@@ -40,20 +44,16 @@ Public:
 - `GET /api/public/schedule`
 - `GET /api/public/menus`
 - `POST /api/public/bookings`
-- `POST /api/public/contact`
 
 Admin (session-protected):
 - `/api/admin/schedule` (GET/POST/PATCH/DELETE)
 - `/api/admin/blackouts` (GET/POST/DELETE)
-- `/api/admin/menus/categories` (GET/POST/PATCH/DELETE)
+- `/api/admin/menus/categories` (GET/POST/PATCH)
 - `/api/admin/menus/items` (POST/PATCH/DELETE)
 - `/api/admin/bookings` (GET/PATCH)
 - `/api/admin/settings` (GET/PATCH)
 
-## What was fixed after review
-- Booking form now sends valid `BookingType` values and proper labeled required fields.
-- Contact page now submits to a real backend endpoint and sends email when SMTP is configured.
-- Admin bookings page now supports confirm/decline/mark-contacted actions from the UI.
-- Admin settings page now supports editing and saving.
-- Admin menus page now supports basic category/item creation and item availability toggling.
-- Settings and schedule admin APIs were hardened for missing records/IDs.
+## Notes
+- Booking requests are always stored; conflicts only flag requests and return suggestions.
+- Admin drag/drop rescheduling is enabled on the admin calendar.
+- SEO includes metadata, robots, and sitemap.

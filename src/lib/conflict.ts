@@ -1,24 +1,18 @@
 import { BookingStatus, type PrismaClient } from "@prisma/client";
 
-export function timeFrameToRange(eventDate: Date, timeFrame: string) {
-  const [startStr = "00:00", endStr = "23:59"] = timeFrame.split("-").map((v) => v.trim());
-  const [startH = 0, startM = 0] = startStr.split(":").map((n) => Number.isNaN(Number(n)) ? 0 : Number(n));
-  const [endH = 23, endM = 59] = endStr.split(":").map((n) => Number.isNaN(Number(n)) ? 59 : Number(n));
-
-  const start = new Date(eventDate);
-  start.setHours(startH, startM, 0, 0);
-  const end = new Date(eventDate);
-  end.setHours(endH, endM, 0, 0);
-
-  return { start, end };
-}
-
 export async function hasBookingConflict(
   prisma: PrismaClient,
   eventDate: Date,
   timeFrame: string,
 ): Promise<boolean> {
-  const { start, end } = timeFrameToRange(eventDate, timeFrame);
+  const [startStr, endStr] = timeFrame.split("-").map((v) => v.trim());
+  const [startH, startM] = startStr.split(":").map(Number);
+  const [endH, endM] = endStr.split(":").map(Number);
+
+  const start = new Date(eventDate);
+  start.setHours(startH || 0, startM || 0, 0, 0);
+  const end = new Date(eventDate);
+  end.setHours(endH || 23, endM || 59, 0, 0);
 
   const blackout = await prisma.blackoutRange.findFirst({
     where: { start: { lte: end }, end: { gte: start } },

@@ -21,21 +21,11 @@ export async function POST(req: NextRequest) {
 export async function PATCH(req: NextRequest) {
   try { await requireAdmin(); } catch { return NextResponse.json({ error: "Unauthorized" }, { status: 401 }); }
   const body = await req.json();
-  const id = body.id as string | undefined;
-  if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-
+  const id = body.id as string;
   const parsed = scheduleSchema.partial().safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
-
   const data = parsed.data;
-  const entry = await prisma.scheduleEntry.update({
-    where: { id },
-    data: {
-      ...data,
-      ...(data.startDateTime ? { startDateTime: new Date(data.startDateTime) } : {}),
-      ...(data.endDateTime ? { endDateTime: new Date(data.endDateTime) } : {}),
-    },
-  });
+  const entry = await prisma.scheduleEntry.update({ where: { id }, data: { ...data, ...(data.startDateTime ? { startDateTime: new Date(data.startDateTime) } : {}), ...(data.endDateTime ? { endDateTime: new Date(data.endDateTime) } : {}) } });
   return NextResponse.json(entry);
 }
 
